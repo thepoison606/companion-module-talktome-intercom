@@ -1,6 +1,6 @@
 # companion-module-talktome-intercom
 
-Bitfocus Companion module for the talktome intercom server.
+Bitfocus Companion module for the talktome intercom server (`https://github.com/thepoison606/talktome`).
 
 ## Development
 

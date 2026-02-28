@@ -13,7 +13,7 @@ export function getConfigFields({ DEFAULT_CONFIG, Regex }: ConfigDeps): SomeComp
 			id: 'info',
 			label: 'Info',
 			width: 12,
-			value: 'Connect this module to the talktome companion api v1. Use either API key auth or user login auth.',
+			value: 'Connect this module to the talktome server. Use either API key auth or user login.',
 		},
 		{
 			type: 'dropdown',
