@@ -1,34 +1,45 @@
 {
-  "name": "companion-module-talktome",
+  "name": "companion-module-talktome-intercom",
   "version": "0.1.4",
-  "description": "Bitfocus companion module for talktome",
+  "main": "dist/main.js",
+  "description": "Bitfocus Companion module for talktome",
   "license": "MIT",
-  "type": "commonjs",
+  "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thepoison606/companion-module-talktome.git"
+    "url": "git+https://github.com/thepoison606/companion-module-talktome-intercom.git"
   },
   "bugs": {
-    "url": "https://github.com/thepoison606/companion-module-talktome/issues"
+    "url": "https://github.com/thepoison606/companion-module-talktome-intercom/issues"
   },
-  "homepage": "https://github.com/thepoison606/companion-module-talktome",
+  "homepage": "https://github.com/thepoison606/companion-module-talktome-intercom",
   "engines": {
-    "node": ">=18"
+    "node": "^22.20",
+    "yarn": "^4"
   },
   "scripts": {
+    "format": "prettier -w .",
+    "package": "yarn build && companion-module-build",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
-    "check": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.build.json --watch",
-    "smoke": "node scripts/smoke-test.js"
+    "lint": "eslint .",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "smoke": "node scripts/smoke-test.cjs"
   },
   "dependencies": {
-    "@companion-module/base": "1.13.2",
+    "@companion-module/base": "~1.14.1",
     "axios": "^1.11.0",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
-    "@types/node": "^22.13.10",
-    "rimraf": "^6.0.1",
-    "typescript": "^5.8.2"
-  }
+    "@companion-module/tools": "^2.6.1",
+    "@types/node": "^22.19.3",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "rimraf": "^6.1.2",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.51.0"
+  },
+  "prettier": "@companion-module/tools/.prettierrc.json",
+  "packageManager": "yarn@4.12.0"
 }

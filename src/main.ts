@@ -2,15 +2,15 @@ import https from 'node:https'
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import { io, Socket } from 'socket.io-client'
 import { InstanceBase, InstanceStatus, Regex, combineRgb, runEntrypoint } from '@companion-module/base'
-import { getConfigFields } from './config'
-import { initActions as defineActions } from './actions'
-import { initFeedbacks as defineFeedbacks } from './feedbacks'
+import { getConfigFields } from './config.js'
+import { initActions as defineActions } from './actions.js'
+import { initFeedbacks as defineFeedbacks } from './feedbacks.js'
 import {
 	initVariableDefinitions as defineVariableDefinitions,
 	updateVariableValuesFromState as updateVariablesFromState,
-} from './variables'
-import { initPresets as definePresets } from './presets'
-import { UpgradeScripts } from './upgrades'
+} from './variables.js'
+import { initPresets as definePresets } from './presets.js'
+import { UpgradeScripts } from './upgrades.js'
 import type {
 	AddressedEntry,
 	ChoiceItem,
@@ -23,7 +23,7 @@ import type {
 	PresetTarget,
 	ScopeMode,
 	UserState,
-} from './types'
+} from './types.js'
 
 const PLACEHOLDER_USER_ID = -1
 const PLACEHOLDER_CONFERENCE_ID = -1
@@ -224,10 +224,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 		this.scopeUserName = ''
 	}
 
-	applyScope(
-		rawScope: unknown,
-		fallback: { mode?: ScopeMode; userId?: number | null; userName?: string } = {}
-	): void {
+	applyScope(rawScope: unknown, fallback: { mode?: ScopeMode; userId?: number | null; userName?: string } = {}): void {
 		const raw = (rawScope ?? {}) as Record<string, unknown>
 		const modeRaw = asString(raw.mode).toLowerCase()
 		const fallbackMode = asString(fallback?.mode).toLowerCase()
@@ -575,7 +572,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 
 		try {
 			this.applySocketAuthContext()
-		} catch (error) {
+		} catch (_error) {
 			return
 		}
 
@@ -679,28 +676,28 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 			this.checkFeedbacks('connection_ok', 'module_not_running')
 		})
 
-			this.socket.on('snapshot', (snapshot) => {
-				this.applySnapshot(snapshot)
-				this.refreshTargetsForAllUsers().catch((error) => {
-					const companionError = toCompanionError(error)
-					this.log('debug', `Target refresh after snapshot failed: ${companionError.message}`)
-				})
+		this.socket.on('snapshot', (snapshot) => {
+			this.applySnapshot(snapshot)
+			this.refreshTargetsForAllUsers().catch((error) => {
+				const companionError = toCompanionError(error)
+				this.log('debug', `Target refresh after snapshot failed: ${companionError.message}`)
 			})
+		})
 
 		this.socket.on('user-targets-updated', (payload) => {
-				const userId = Number(payload?.userId)
-				if (Number.isFinite(userId)) {
-					this.refreshTargetsForSingleUser(userId).catch((error) => {
-						const companionError = toCompanionError(error)
-						this.log('debug', `Target refresh for user ${userId} failed: ${companionError.message}`)
-					})
-					return
-				}
-				this.refreshTargetsForAllUsers().catch((error) => {
+			const userId = Number(payload?.userId)
+			if (Number.isFinite(userId)) {
+				this.refreshTargetsForSingleUser(userId).catch((error) => {
 					const companionError = toCompanionError(error)
-					this.log('debug', `Target refresh failed: ${companionError.message}`)
+					this.log('debug', `Target refresh for user ${userId} failed: ${companionError.message}`)
 				})
+				return
+			}
+			this.refreshTargetsForAllUsers().catch((error) => {
+				const companionError = toCompanionError(error)
+				this.log('debug', `Target refresh failed: ${companionError.message}`)
 			})
+		})
 
 		this.socket.on('user-state', (payload) => {
 			if (payload?.state) {
@@ -786,7 +783,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 			'user_addressed_now',
 			'operator_not_logged_in',
 			'user_cut_camera',
-			'last_command_failed'
+			'last_command_failed',
 		)
 	}
 
@@ -836,14 +833,10 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 
 	async refreshTargetsForUsers(
 		userIds: unknown[],
-		{ pruneMissing = false }: { pruneMissing?: boolean } = {}
+		{ pruneMissing = false }: { pruneMissing?: boolean } = {},
 	): Promise<void> {
 		const normalizedUserIds = Array.from(
-			new Set(
-				(userIds || [])
-					.map((id) => Number(id))
-					.filter((id) => Number.isFinite(id) && this.users.has(id))
-			)
+			new Set((userIds || []).map((id) => Number(id)).filter((id) => Number.isFinite(id) && this.users.has(id))),
 		)
 
 		let changed = false
@@ -867,7 +860,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 					this.log('debug', `Targets for user ${userId} failed: ${companionError.message}`)
 					return { userId, targets: this.userTargets.get(userId) || [] }
 				}
-			})
+			}),
 		)
 
 		for (const result of results) {
@@ -889,7 +882,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 				'user_talking_reply',
 				'target_addressed_now',
 				'reply_available',
-				'user_addressed_now'
+				'user_addressed_now',
 			)
 		}
 	}
@@ -940,7 +933,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 			'reply_available',
 			'user_addressed_now',
 			'operator_not_logged_in',
-			'user_cut_camera'
+			'user_cut_camera',
 		)
 	}
 
@@ -1040,8 +1033,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 	resolveReplyReferenceTarget(userId: unknown): NormalizedTarget | null {
 		const normalizedUserId = Number(userId)
 		if (!Number.isFinite(normalizedUserId)) return null
-		const addressed =
-			this.currentAddressedBy.get(normalizedUserId) || this.lastAddressedBy.get(normalizedUserId)
+		const addressed = this.currentAddressedBy.get(normalizedUserId) || this.lastAddressedBy.get(normalizedUserId)
 		if (!addressed) return null
 		return this.normalizeStateTarget({
 			type: addressed.targetType,
@@ -1074,7 +1066,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 	isAddressingEntryMatchingTarget(
 		entry: AddressedEntry | null | undefined,
 		targetType: unknown,
-		targetId: unknown
+		targetId: unknown,
 	): boolean {
 		if (!entry) return false
 		const entryTarget = this.normalizeStateTarget({
@@ -1115,9 +1107,9 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 		}
 
 		if (entryTargetType === 'user') {
-				const targetUserId = Number(this.resolveUserIdFromTargetId(entry.targetId))
-				if (Number.isFinite(targetUserId) && targetUserId !== normalizedUserId) {
-					const targetUserName = asString(this.users.get(targetUserId)?.name)
+			const targetUserId = Number(this.resolveUserIdFromTargetId(entry.targetId))
+			if (Number.isFinite(targetUserId) && targetUserId !== normalizedUserId) {
+				const targetUserName = asString(this.users.get(targetUserId)?.name)
 				if (targetUserName) return targetUserName
 			}
 			const fromName = asString(entry.fromName)
@@ -1174,7 +1166,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 	userHasConferenceTarget(userId: unknown, conferenceId: unknown): boolean {
 		const targets = this.userTargets.get(Number(userId)) || []
 		return targets.some(
-			(target) => target.targetType === 'conference' && Number(target.targetId) === Number(conferenceId)
+			(target) => target.targetType === 'conference' && Number(target.targetId) === Number(conferenceId),
 		)
 	}
 
@@ -1239,7 +1231,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 		spokenTarget: NormalizedTarget | null,
 		speakerUserId: unknown,
 		fromName: string,
-		at: number
+		at: number,
 	): AddressedEntry | null {
 		const normalizedSpeakerId = Number(speakerUserId)
 		if (!spokenTarget || !Number.isFinite(normalizedSpeakerId)) return null
@@ -1338,7 +1330,7 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 			'target_addressed_now',
 			'reply_available',
 			'user_addressed_now',
-			'operator_not_logged_in'
+			'operator_not_logged_in',
 		)
 
 		if (reason === 'Target offline') {
@@ -1353,15 +1345,13 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig> {
 				? sortedUsers.map((user) => ({ id: user.id, label: `${user.name} (#${user.id})` }))
 				: [{ id: PLACEHOLDER_USER_ID, label: 'No users available' }]
 
-		const sortedConferences = Array.from(this.conferences.values()).sort((a, b) =>
-			a.name.localeCompare(b.name)
-		)
+		const sortedConferences = Array.from(this.conferences.values()).sort((a, b) => a.name.localeCompare(b.name))
 		this.conferenceChoices =
 			sortedConferences.length > 0
 				? sortedConferences.map((conference) => ({
-							id: conference.id,
-							label: `${conference.name} (#${conference.id})`,
-					  }))
+						id: conference.id,
+						label: `${conference.name} (#${conference.id})`,
+					}))
 				: [{ id: PLACEHOLDER_CONFERENCE_ID, label: 'No conferences available' }]
 	}
 

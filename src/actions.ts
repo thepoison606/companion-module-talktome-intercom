@@ -1,4 +1,4 @@
-import type { TalkToMeCompanionInstance } from './main'
+import type { TalkToMeCompanionInstance } from './main.js'
 import type { CompanionActionEvent } from '@companion-module/base'
 
 type ActionDeps = {
@@ -87,7 +87,7 @@ export function initActions(self: TalkToMeCompanionInstance, deps: ActionDeps): 
 								? event.options.targetConferenceId
 								: targetType === 'user'
 									? event.options.targetUserId
-									: ''
+									: '',
 						),
 						at: Date.now(),
 					}
@@ -96,7 +96,7 @@ export function initActions(self: TalkToMeCompanionInstance, deps: ActionDeps): 
 					if (reason === 'Target offline') {
 						self.triggerTargetOfflineFeedbackFlash()
 					}
-					self.log(Boolean(rawError.authFailure) ? 'error' : 'warn', message)
+					self.log(rawError.authFailure ? 'error' : 'warn', message)
 				}
 			},
 		},

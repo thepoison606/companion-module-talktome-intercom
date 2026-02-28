@@ -1,5 +1,5 @@
 import type { SomeCompanionConfigField } from '@companion-module/base'
-import type { ModuleConfig } from './types'
+import type { ModuleConfig } from './types.js'
 
 type ConfigDeps = {
 	DEFAULT_CONFIG: ModuleConfig
@@ -13,8 +13,7 @@ export function getConfigFields({ DEFAULT_CONFIG, Regex }: ConfigDeps): SomeComp
 			id: 'info',
 			label: 'Info',
 			width: 12,
-			value:
-				'Connect this module to the talktome companion api v1. Use either API key auth or user login auth.',
+			value: 'Connect this module to the talktome companion api v1. Use either API key auth or user login auth.',
 		},
 		{
 			type: 'dropdown',

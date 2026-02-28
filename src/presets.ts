@@ -1,5 +1,5 @@
 import type { CompanionPresetDefinitions } from '@companion-module/base'
-import type { TalkToMeCompanionInstance } from './main'
+import type { TalkToMeCompanionInstance } from './main.js'
 
 type PresetDeps = {
 	PLACEHOLDER_CONFERENCE_ID: number
@@ -99,11 +99,11 @@ export function initPresets(self: TalkToMeCompanionInstance, deps: PresetDeps): 
 								targetConferenceId: defaultConferenceId,
 								targetUserId: userId,
 							},
-							},
-						],
-					},
-				],
-			}
+						},
+					],
+				},
+			],
+		}
 
 		const seenTargetKeys = new Set()
 		for (const target of userTargets) {
@@ -120,8 +120,7 @@ export function initPresets(self: TalkToMeCompanionInstance, deps: PresetDeps): 
 			const commandOptions = {
 				userId,
 				targetType: target.targetType,
-				targetConferenceId:
-					target.targetType === 'conference' ? target.targetId : defaultConferenceId,
+				targetConferenceId: target.targetType === 'conference' ? target.targetId : defaultConferenceId,
 				targetUserId: target.targetType === 'user' ? target.targetId : userId,
 			}
 

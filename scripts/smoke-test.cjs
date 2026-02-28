@@ -44,14 +44,10 @@ function assert(condition, message, details) {
 	}
 }
 
-const configuredRepoRoot = process.env.TALKTOME_REPO_ROOT
-	? path.resolve(process.env.TALKTOME_REPO_ROOT)
-	: null
+const configuredRepoRoot = process.env.TALKTOME_REPO_ROOT ? path.resolve(process.env.TALKTOME_REPO_ROOT) : null
 const repoRoot = configuredRepoRoot || findTalkToMeRepoRoot(__dirname)
 if (!repoRoot) {
-	fail(
-		'Could not locate talktome app repo. Set TALKTOME_REPO_ROOT or TALKTOME_SERVER_ENTRY for standalone use.'
-	)
+	fail('Could not locate talktome app repo. Set TALKTOME_REPO_ROOT or TALKTOME_SERVER_ENTRY for standalone use.')
 }
 
 const serverEntry = process.env.TALKTOME_SERVER_ENTRY
@@ -73,7 +69,7 @@ async function waitForServerReady(http, timeoutMs = 30000) {
 			if (response.status === 200) {
 				return
 			}
-		} catch (error) {
+		} catch (_error) {
 			// ignore while server boots
 		}
 		await wait(300)
@@ -142,7 +138,7 @@ async function main() {
 				'-e',
 				"try { const Database = require('better-sqlite3'); const db = new Database(':memory:'); db.prepare('select 1').get(); db.close(); process.exit(0) } catch (e) { process.exit(1) }",
 			],
-			{ cwd: repoRoot, stdio: 'ignore' }
+			{ cwd: repoRoot, stdio: 'ignore' },
 		)
 		return probe.status === 0
 	}
@@ -220,7 +216,7 @@ async function main() {
 		const createUserA = await http.post(
 			'/users',
 			{ name: operatorAName, password: operatorPassword },
-			{ headers: { Cookie: adminCookie } }
+			{ headers: { Cookie: adminCookie } },
 		)
 		assert(createUserA.status === 200, 'create operator A failed', createUserA.data)
 		const operatorAId = Number(createUserA.data?.id)
@@ -229,7 +225,7 @@ async function main() {
 		const createUserB = await http.post(
 			'/users',
 			{ name: operatorBName, password: operatorPassword },
-			{ headers: { Cookie: adminCookie } }
+			{ headers: { Cookie: adminCookie } },
 		)
 		assert(createUserB.status === 200, 'create operator B failed', createUserB.data)
 		const operatorBId = Number(createUserB.data?.id)
@@ -238,7 +234,7 @@ async function main() {
 		const conferenceA = await http.post(
 			'/conferences',
 			{ name: `Conference_${suffix}` },
-			{ headers: { Cookie: adminCookie } }
+			{ headers: { Cookie: adminCookie } },
 		)
 		assert(conferenceA.status === 200, 'create conference A failed', conferenceA.data)
 		const conferenceAId = Number(conferenceA.data?.id)
@@ -247,7 +243,7 @@ async function main() {
 		const conferenceB = await http.post(
 			'/conferences',
 			{ name: `Conference_extra_${suffix}` },
-			{ headers: { Cookie: adminCookie } }
+			{ headers: { Cookie: adminCookie } },
 		)
 		assert(conferenceB.status === 200, 'create conference B failed', conferenceB.data)
 		const conferenceBId = Number(conferenceB.data?.id)
@@ -257,7 +253,7 @@ async function main() {
 		const addUserTarget = await http.post(
 			`/users/${operatorAId}/targets`,
 			{ targetType: 'user', targetId: operatorBId },
-			{ headers: { Cookie: adminCookie } }
+			{ headers: { Cookie: adminCookie } },
 		)
 		assert(addUserTarget.status === 204, 'add user target failed', {
 			status: addUserTarget.status,
@@ -267,7 +263,7 @@ async function main() {
 		const addConferenceTarget = await http.post(
 			`/users/${operatorAId}/targets`,
 			{ targetType: 'conference', targetId: conferenceAId },
-			{ headers: { Cookie: adminCookie } }
+			{ headers: { Cookie: adminCookie } },
 		)
 		assert(addConferenceTarget.status === 204, 'add conference target failed', {
 			status: addConferenceTarget.status,
@@ -286,7 +282,11 @@ async function main() {
 		const operatorToken = String(operatorLogin.data?.token || '')
 		assert(operatorToken.length > 20, 'operator token missing', operatorLogin.data)
 		assert(operatorLogin.data?.scope?.mode === 'self', 'operator scope should be self', operatorLogin.data)
-		assert(Number(operatorLogin.data?.scope?.userId) === operatorAId, 'operator scope userId mismatch', operatorLogin.data)
+		assert(
+			Number(operatorLogin.data?.scope?.userId) === operatorAId,
+			'operator scope userId mismatch',
+			operatorLogin.data,
+		)
 		resultLines.push('operator login scope(self): ok')
 
 		const operatorUsers = await http.get('/api/v1/companion/users', {
@@ -297,7 +297,7 @@ async function main() {
 		assert(
 			operatorUsers.data.length === 1 && Number(operatorUsers.data[0]?.id) === operatorAId,
 			'operator should only see self in /users',
-			operatorUsers.data
+			operatorUsers.data,
 		)
 
 		const operatorState = await http.get('/api/v1/companion/state', {
@@ -305,7 +305,11 @@ async function main() {
 		})
 		assert(operatorState.status === 200, 'operator state request failed')
 		assert(operatorState.data?.scope?.mode === 'self', 'operator state scope should be self', operatorState.data)
-		assert(Number(operatorState.data?.scope?.userId) === operatorAId, 'operator state scope userId mismatch', operatorState.data)
+		assert(
+			Number(operatorState.data?.scope?.userId) === operatorAId,
+			'operator state scope userId mismatch',
+			operatorState.data,
+		)
 		resultLines.push('operator scoped state/users: ok')
 
 		const operatorTargets = await http.get(`/api/v1/companion/users/${operatorAId}/targets`, {
@@ -314,10 +318,10 @@ async function main() {
 		assert(operatorTargets.status === 200, 'operator targets request failed')
 		assert(Array.isArray(operatorTargets.data), 'operator targets should be array', operatorTargets.data)
 		const hasUserTarget = operatorTargets.data.some(
-			(target) => target?.targetType === 'user' && Number(target?.targetId) === operatorBId
+			(target) => target?.targetType === 'user' && Number(target?.targetId) === operatorBId,
 		)
 		const hasConferenceTarget = operatorTargets.data.some(
-			(target) => target?.targetType === 'conference' && Number(target?.targetId) === conferenceAId
+			(target) => target?.targetType === 'conference' && Number(target?.targetId) === conferenceAId,
 		)
 		assert(hasUserTarget && hasConferenceTarget, 'assigned targets missing from operator targets', operatorTargets.data)
 		resultLines.push('operator targets visible: ok')
@@ -342,19 +346,23 @@ async function main() {
 			})
 		})
 
-		const snapshotPayload = await waitForSocketEvent(socket, 'snapshot', (payload) => payload && Array.isArray(payload.users))
+		const snapshotPayload = await waitForSocketEvent(
+			socket,
+			'snapshot',
+			(payload) => payload && Array.isArray(payload.users),
+		)
 		assert(snapshotPayload.scope?.mode === 'all', 'socket snapshot scope should be all for api key', snapshotPayload)
 		resultLines.push('socket connect + snapshot: ok')
 
 		const userTargetsUpdatedWait = waitForSocketEvent(
 			socket,
 			'user-targets-updated',
-			(payload) => Number(payload?.userId) === operatorAId
+			(payload) => Number(payload?.userId) === operatorAId,
 		)
 		const addConferenceTarget2 = await http.post(
 			`/users/${operatorAId}/targets`,
 			{ targetType: 'conference', targetId: conferenceBId },
-			{ headers: { Cookie: adminCookie } }
+			{ headers: { Cookie: adminCookie } },
 		)
 		assert(addConferenceTarget2.status === 204, 'add extra conference target failed', addConferenceTarget2.data)
 		await userTargetsUpdatedWait
@@ -372,7 +380,9 @@ async function main() {
 			(payload) =>
 				Number(payload?.userId) === operatorAId &&
 				payload?.ok === false &&
-				String(payload?.reason || '').toLowerCase().includes('user not connected')
+				String(payload?.reason || '')
+					.toLowerCase()
+					.includes('user not connected'),
 		)
 		const talkOffline = await http.post(
 			`/api/v1/companion/users/${operatorAId}/talk`,
@@ -384,7 +394,7 @@ async function main() {
 			},
 			{
 				headers: { 'x-api-key': apiKey },
-			}
+			},
 		)
 		assert(talkOffline.status === 404, 'offline talk should return 404 user not connected', {
 			status: talkOffline.status,
@@ -413,17 +423,14 @@ async function main() {
 		if (!server.killed) {
 			server.kill('SIGTERM')
 		}
-		await Promise.race([
-			new Promise((resolve) => server.once('exit', resolve)),
-			wait(5000),
-		])
+		await Promise.race([new Promise((resolve) => server.once('exit', resolve)), wait(5000)])
 		if (!server.killed) {
 			server.kill('SIGKILL')
 		}
 
 		try {
 			fs.rmSync(tempDataDir, { recursive: true, force: true })
-		} catch (error) {
+		} catch (_error) {
 			// ignore cleanup errors
 		}
 

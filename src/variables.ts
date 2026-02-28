@@ -1,4 +1,4 @@
-import type { TalkToMeCompanionInstance } from './main'
+import type { TalkToMeCompanionInstance } from './main.js'
 
 type VariableDeps = {
 	asString: (value: unknown) => string

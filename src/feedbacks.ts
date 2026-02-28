@@ -1,4 +1,4 @@
-import type { TalkToMeCompanionInstance } from './main'
+import type { TalkToMeCompanionInstance } from './main.js'
 
 type FeedbackDeps = {
 	PLACEHOLDER_USER_ID: number
@@ -181,247 +181,247 @@ export function initFeedbacks(self: TalkToMeCompanionInstance, deps: FeedbackDep
 					choices: self.userChoices,
 				},
 			],
-				callback: (feedback) => {
-					const userId = self.resolveChoiceId(feedback.options.userId)
-					if (!userId) return false
-					return Boolean(self.users.get(userId)?.talkLocked)
-				},
+			callback: (feedback) => {
+				const userId = self.resolveChoiceId(feedback.options.userId)
+				if (!userId) return false
+				return Boolean(self.users.get(userId)?.talkLocked)
 			},
-			target_online: {
-				type: 'boolean',
-				name: 'Target online',
-				defaultStyle: {
-					bgcolor: WEB_COLORS.blue,
-					color: WEB_COLORS.blueText,
+		},
+		target_online: {
+			type: 'boolean',
+			name: 'Target online',
+			defaultStyle: {
+				bgcolor: WEB_COLORS.blue,
+				color: WEB_COLORS.blueText,
+			},
+			options: [
+				{
+					type: 'dropdown',
+					id: 'userId',
+					label: 'Operator User',
+					default: defaultUserId,
+					choices: self.userChoices,
 				},
-				options: [
-					{
-						type: 'dropdown',
-						id: 'userId',
-						label: 'Operator User',
-						default: defaultUserId,
-						choices: self.userChoices,
-					},
-					{
-						type: 'dropdown',
-						id: 'targetType',
-						label: 'Target Type',
-						default: 'user',
-						choices: [
-							{ id: 'user', label: 'user' },
-							{ id: 'conference', label: 'conference' },
-						],
-					},
-					{
-						type: 'number',
-						id: 'targetId',
-						label: 'Target ID',
-						default: defaultUserId,
-						min: 1,
-						max: 100000,
-					},
-				],
-				callback: (feedback) => {
-					const operatorUserId = self.resolveChoiceId(feedback.options.userId)
-					if (!operatorUserId) return false
-					if (!self.users.get(operatorUserId)?.online) return false
+				{
+					type: 'dropdown',
+					id: 'targetType',
+					label: 'Target Type',
+					default: 'user',
+					choices: [
+						{ id: 'user', label: 'user' },
+						{ id: 'conference', label: 'conference' },
+					],
+				},
+				{
+					type: 'number',
+					id: 'targetId',
+					label: 'Target ID',
+					default: defaultUserId,
+					min: 1,
+					max: 100000,
+				},
+			],
+			callback: (feedback) => {
+				const operatorUserId = self.resolveChoiceId(feedback.options.userId)
+				if (!operatorUserId) return false
+				if (!self.users.get(operatorUserId)?.online) return false
 
-					const targetId = self.resolveChoiceId(feedback.options.targetId)
-					if (!targetId) return false
-					const targetType = asString(feedback.options.targetType).toLowerCase()
+				const targetId = self.resolveChoiceId(feedback.options.targetId)
+				if (!targetId) return false
+				const targetType = asString(feedback.options.targetType).toLowerCase()
 
-					return self.resolveTargetOnline(targetType, targetId)
-				},
+				return self.resolveTargetOnline(targetType, targetId)
 			},
-			target_offline: {
-				type: 'boolean',
-				name: 'Target offline',
-				defaultStyle: {
-					bgcolor: WEB_COLORS.offline,
-					color: WEB_COLORS.offlineText,
+		},
+		target_offline: {
+			type: 'boolean',
+			name: 'Target offline',
+			defaultStyle: {
+				bgcolor: WEB_COLORS.offline,
+				color: WEB_COLORS.offlineText,
+			},
+			options: [
+				{
+					type: 'dropdown',
+					id: 'userId',
+					label: 'Operator User',
+					default: defaultUserId,
+					choices: self.userChoices,
 				},
-				options: [
-					{
-						type: 'dropdown',
-						id: 'userId',
-						label: 'Operator User',
-						default: defaultUserId,
-						choices: self.userChoices,
-					},
-					{
-						type: 'dropdown',
-						id: 'targetType',
-						label: 'Target Type',
-						default: 'user',
-						choices: [
-							{ id: 'user', label: 'user' },
-							{ id: 'conference', label: 'conference' },
-						],
-					},
-					{
-						type: 'number',
-						id: 'targetId',
-						label: 'Target ID',
-						default: defaultUserId,
-						min: 1,
-						max: 100000,
-					},
-				],
-				callback: (feedback) => {
-					const operatorUserId = self.resolveChoiceId(feedback.options.userId)
-					if (!operatorUserId) return false
+				{
+					type: 'dropdown',
+					id: 'targetType',
+					label: 'Target Type',
+					default: 'user',
+					choices: [
+						{ id: 'user', label: 'user' },
+						{ id: 'conference', label: 'conference' },
+					],
+				},
+				{
+					type: 'number',
+					id: 'targetId',
+					label: 'Target ID',
+					default: defaultUserId,
+					min: 1,
+					max: 100000,
+				},
+			],
+			callback: (feedback) => {
+				const operatorUserId = self.resolveChoiceId(feedback.options.userId)
+				if (!operatorUserId) return false
 
-					const targetId = self.resolveChoiceId(feedback.options.targetId)
-					if (!targetId) return false
-					const targetType = asString(feedback.options.targetType).toLowerCase()
+				const targetId = self.resolveChoiceId(feedback.options.targetId)
+				if (!targetId) return false
+				const targetType = asString(feedback.options.targetType).toLowerCase()
 
-					return !self.resolveTargetOnline(targetType, targetId)
-				},
+				return !self.resolveTargetOnline(targetType, targetId)
 			},
-			target_addressed_now: {
-				type: 'boolean',
-				name: 'Target speaks to user (now)',
-				defaultStyle: {
-					bgcolor: WEB_COLORS.green,
-					color: WEB_COLORS.greenText,
-				},
-				options: [
-					{
-						type: 'dropdown',
-						id: 'userId',
-						label: 'Operator User',
-						default: defaultUserId,
-						choices: self.userChoices,
-					},
-					{
-						type: 'dropdown',
-						id: 'targetType',
-						label: 'Target Type',
-						default: 'user',
-						choices: [
-							{ id: 'user', label: 'user' },
-							{ id: 'conference', label: 'conference' },
-						],
-					},
-					{
-						type: 'number',
-						id: 'targetId',
-						label: 'Target ID',
-						default: defaultUserId,
-						min: 1,
-						max: 100000,
-					},
-				],
-				callback: (feedback) => {
-					const userId = self.resolveChoiceId(feedback.options.userId)
-					if (!userId) return false
-					const targetType = asString(feedback.options.targetType).toLowerCase()
-					const targetId = self.resolveChoiceId(feedback.options.targetId)
-					if (!targetId) return false
-					return self.isUserAddressedByTargetNow(userId, targetType, targetId)
-				},
+		},
+		target_addressed_now: {
+			type: 'boolean',
+			name: 'Target speaks to user (now)',
+			defaultStyle: {
+				bgcolor: WEB_COLORS.green,
+				color: WEB_COLORS.greenText,
 			},
-			last_target_offline: {
-				type: 'boolean',
-				name: 'Last pressed target offline',
-				defaultStyle: {
-					bgcolor: WEB_COLORS.offline,
-					color: WEB_COLORS.offlineText,
-					text: 'TARGET\\nOFFLINE',
+			options: [
+				{
+					type: 'dropdown',
+					id: 'userId',
+					label: 'Operator User',
+					default: defaultUserId,
+					choices: self.userChoices,
 				},
-				options: [
-					{
-						type: 'dropdown',
-						id: 'userId',
-						label: 'Operator User',
-						default: defaultUserId,
-						choices: self.userChoices,
-					},
-					{
-						type: 'dropdown',
-						id: 'targetType',
-						label: 'Target Type',
-						default: 'user',
-						choices: [
-							{ id: 'user', label: 'user' },
-							{ id: 'conference', label: 'conference' },
-						],
-					},
-					{
-						type: 'number',
-						id: 'targetId',
-						label: 'Target ID',
-						default: defaultUserId,
-						min: 1,
-						max: 100000,
-					},
-				],
-				callback: (feedback) => {
-					const userId = self.resolveChoiceId(feedback.options.userId)
-					if (!userId) return false
-					if (asString(self.lastCommand.reason) !== 'Target offline') return false
-					if (asString(self.lastCommand.userId) !== String(userId)) return false
-					if (Date.now() - Number(self.lastCommand.at || 0) > 1500) return false
+				{
+					type: 'dropdown',
+					id: 'targetType',
+					label: 'Target Type',
+					default: 'user',
+					choices: [
+						{ id: 'user', label: 'user' },
+						{ id: 'conference', label: 'conference' },
+					],
+				},
+				{
+					type: 'number',
+					id: 'targetId',
+					label: 'Target ID',
+					default: defaultUserId,
+					min: 1,
+					max: 100000,
+				},
+			],
+			callback: (feedback) => {
+				const userId = self.resolveChoiceId(feedback.options.userId)
+				if (!userId) return false
+				const targetType = asString(feedback.options.targetType).toLowerCase()
+				const targetId = self.resolveChoiceId(feedback.options.targetId)
+				if (!targetId) return false
+				return self.isUserAddressedByTargetNow(userId, targetType, targetId)
+			},
+		},
+		last_target_offline: {
+			type: 'boolean',
+			name: 'Last pressed target offline',
+			defaultStyle: {
+				bgcolor: WEB_COLORS.offline,
+				color: WEB_COLORS.offlineText,
+				text: 'TARGET\\nOFFLINE',
+			},
+			options: [
+				{
+					type: 'dropdown',
+					id: 'userId',
+					label: 'Operator User',
+					default: defaultUserId,
+					choices: self.userChoices,
+				},
+				{
+					type: 'dropdown',
+					id: 'targetType',
+					label: 'Target Type',
+					default: 'user',
+					choices: [
+						{ id: 'user', label: 'user' },
+						{ id: 'conference', label: 'conference' },
+					],
+				},
+				{
+					type: 'number',
+					id: 'targetId',
+					label: 'Target ID',
+					default: defaultUserId,
+					min: 1,
+					max: 100000,
+				},
+			],
+			callback: (feedback) => {
+				const userId = self.resolveChoiceId(feedback.options.userId)
+				if (!userId) return false
+				if (asString(self.lastCommand.reason) !== 'Target offline') return false
+				if (asString(self.lastCommand.userId) !== String(userId)) return false
+				if (Date.now() - Number(self.lastCommand.at || 0) > 1500) return false
 
-					const targetType = asString(feedback.options.targetType).toLowerCase()
-					const targetId = self.resolveChoiceId(feedback.options.targetId)
-					if (!targetId) return false
+				const targetType = asString(feedback.options.targetType).toLowerCase()
+				const targetId = self.resolveChoiceId(feedback.options.targetId)
+				if (!targetId) return false
 
-					return (
-						asString(self.lastCommand.targetType).toLowerCase() === targetType &&
-						Number(self.lastCommand.targetId) === Number(targetId)
-					)
-				},
+				return (
+					asString(self.lastCommand.targetType).toLowerCase() === targetType &&
+					Number(self.lastCommand.targetId) === Number(targetId)
+				)
 			},
-			user_addressed_now: {
-				type: 'boolean',
-				name: 'User is being addressed (now)',
-				defaultStyle: {
-					bgcolor: WEB_COLORS.green,
-					color: WEB_COLORS.greenText,
-				},
-				options: [
-					{
-						type: 'dropdown',
-						id: 'userId',
-						label: 'User',
-						default: defaultUserId,
-						choices: self.userChoices,
-					},
-				],
-				callback: (feedback) => {
-					const userId = self.resolveChoiceId(feedback.options.userId)
-					if (!userId) return false
-					return self.currentAddressedBy.has(userId)
-				},
+		},
+		user_addressed_now: {
+			type: 'boolean',
+			name: 'User is being addressed (now)',
+			defaultStyle: {
+				bgcolor: WEB_COLORS.green,
+				color: WEB_COLORS.greenText,
 			},
-			operator_not_logged_in: {
-				type: 'boolean',
-				name: 'User not logged in',
-				defaultStyle: {
-					bgcolor: WEB_COLORS.offline,
-					color: WEB_COLORS.offlineText,
-					text: 'LOGIN TO TALK',
+			options: [
+				{
+					type: 'dropdown',
+					id: 'userId',
+					label: 'User',
+					default: defaultUserId,
+					choices: self.userChoices,
 				},
-				options: [
-					{
-						type: 'dropdown',
-						id: 'userId',
-						label: 'User',
-						default: defaultUserId,
-						choices: self.userChoices,
-					},
-				],
-				callback: (feedback) => {
-					const userId = self.resolveChoiceId(feedback.options.userId)
-					if (!userId) return true
-					return !self.users.get(userId)?.online
-				},
+			],
+			callback: (feedback) => {
+				const userId = self.resolveChoiceId(feedback.options.userId)
+				if (!userId) return false
+				return self.currentAddressedBy.has(userId)
 			},
-			user_cut_camera: {
-				type: 'boolean',
-				name: 'User on-air (cut-camera)',
-				defaultStyle: {
+		},
+		operator_not_logged_in: {
+			type: 'boolean',
+			name: 'User not logged in',
+			defaultStyle: {
+				bgcolor: WEB_COLORS.offline,
+				color: WEB_COLORS.offlineText,
+				text: 'LOGIN TO TALK',
+			},
+			options: [
+				{
+					type: 'dropdown',
+					id: 'userId',
+					label: 'User',
+					default: defaultUserId,
+					choices: self.userChoices,
+				},
+			],
+			callback: (feedback) => {
+				const userId = self.resolveChoiceId(feedback.options.userId)
+				if (!userId) return true
+				return !self.users.get(userId)?.online
+			},
+		},
+		user_cut_camera: {
+			type: 'boolean',
+			name: 'User on-air (cut-camera)',
+			defaultStyle: {
 				bgcolor: combineRgb(140, 0, 0),
 				color: combineRgb(255, 255, 255),
 			},
