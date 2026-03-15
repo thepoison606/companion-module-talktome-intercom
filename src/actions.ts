@@ -237,5 +237,35 @@ export function initActions(self: TalkToMeCompanionInstance, deps: ActionDeps): 
 				}
 			},
 		},
+		send_tally: {
+			name: 'Send tally',
+			options: [
+				{
+					type: 'dropdown',
+					id: 'action',
+					label: 'Action',
+					default: 'set',
+					choices: [
+						{ id: 'set', label: 'set user' },
+						{ id: 'clear', label: 'clear' },
+					],
+				},
+				{
+					type: 'dropdown',
+					id: 'userId',
+					label: 'Tally User',
+					default: defaultUserId,
+					choices: self.userChoices,
+					isVisibleExpression: "$(options:action) == 'set'",
+				},
+			],
+			callback: async (event: CompanionActionEvent) => {
+				try {
+					await self.executeTallyCommand(event.options)
+				} catch (error: unknown) {
+					handleCommandFailure(self, event, error, 'Send tally failed', InstanceStatus, asString)
+				}
+			},
+		},
 	})
 }

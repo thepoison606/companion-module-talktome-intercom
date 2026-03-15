@@ -1697,6 +1697,61 @@ export class TalkToMeCompanionInstance extends InstanceBase<ModuleConfig, Module
 		}
 	}
 
+	async executeTallyCommand(options: Record<string, unknown>): Promise<void> {
+		const action = asString(options.action).toLowerCase() || 'set'
+		let targetUserId: number | null = null
+		let targetUserName = ''
+
+		if (action === 'set') {
+			targetUserId = this.resolveChoiceId(options.userId)
+			if (!targetUserId) {
+				throw new Error('Invalid user')
+			}
+			if (!this.canControlUser(targetUserId)) {
+				const error: CompanionError = new Error('Forbidden for this companion account')
+				error.authFailure = true
+				throw error
+			}
+
+			targetUserName = asString(this.users.get(targetUserId)?.name)
+			if (!targetUserName) {
+				throw new Error('Target user missing name')
+			}
+		} else if (action !== 'clear') {
+			throw new Error('Invalid tally action')
+		}
+
+		let response: AxiosResponse
+		try {
+			response = await this.apiRequest('POST', '/cut-camera', {
+				user: targetUserName,
+			})
+		} catch (error) {
+			throw toCompanionError(error)
+		}
+
+		if (response.status < 200 || response.status >= 300) {
+			const result = asObject(response.data)
+			const error: CompanionError = new Error(asString(result.error) || `HTTP ${response.status}`)
+			error.statusCode = response.status
+			error.responseData = response.data
+			throw error
+		}
+
+		this.cutCameraUser = asString(response.data?.user)
+		this.lastCommand = {
+			commandId: '',
+			status: 'ok',
+			reason: '',
+			userId: targetUserId ? String(targetUserId) : '',
+			targetType: 'tally',
+			targetId: targetUserId ? String(targetUserId) : '',
+			at: Date.now(),
+		}
+		this.updateVariableValuesFromState()
+		this.checkFeedbacks('last_command_failed', 'user_cut_camera')
+	}
+
 	initActions() {
 		return defineActions(this, {
 			PLACEHOLDER_USER_ID,

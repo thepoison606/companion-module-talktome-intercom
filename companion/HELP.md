@@ -17,6 +17,7 @@ If the talktome server uses a self-signed certificate, enable the matching TLS o
 ## What The Module Does
 
 - Sends talk commands to talktome users
+- Sends tally / cut-camera to a selected user or clears it
 - Changes target volume in fixed 4% steps and toggles target mute
 - Shows live feedback for online state, talking state, talk lock and on-air state
 - Builds presets automatically per available user
